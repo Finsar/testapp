@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Клієнт-Сервер</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        #result { margin-top: 20px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <h1>Клієнтський Додаток</h1>
+    <p>Натисни кнопку, щоб отримати дані з сервера</p>
+    
+    <button onclick="getData()">Отримати дані</button>
+
+    <div id="result" style="display:none;">
+        <h3>Відповідь сервера:</h3>
+        <p id="server-msg">...</p>
+        <small id="server-time">...</small>
+    </div>
+
+    <script>
+        // ВАЖЛИВО: Для тестування на телефоні в локальній мережі
+        // заміни 'localhost' на локальний IP комп'ютера (наприклад, '192.168.1.5')
+        // БУЛО: const SERVER_URL = 'http://192.168.0.105:3000/api/hello';
+        const SERVER_URL = '/api/hello';
+        const SERVER_PORT = '3000';
+        const SERVER_URL = `http://${SERVER_IP}:${SERVER_PORT}/api/hello`;
+
+        async function getData() {
+            const resultDiv = document.getElementById('result');
+            const msgP = document.getElementById('server-msg');
+            const timeSmall = document.getElementById('server-time');
+
+            try {
+                msgP.innerText = "Завантаження...";
+                resultDiv.style.display = 'block';
+
+                // Робимо запит до сервера
+                const response = await fetch(SERVER_URL);
+                
+                if (!response.ok) throw new Error('Помилка мережі');
+
+                const data = await response.json();
+
+                // Відображаємо дані
+                msgP.innerText = data.message;
+                timeSmall.innerText = "Час сервера: " + data.serverTime;
+                msgP.style.color = "green";
+
+            } catch (error) {
+                console.error(error);
+                msgP.innerText = "Не вдалося з'єднатися з сервером. Перевір IP-адресу!";
+                msgP.style.color = "red";
+                timeSmall.innerText = "";
+            }
+        }
+    </script>
+</body>
+</html>
