@@ -16,7 +16,7 @@
     <h1>Клієнтський Додаток</h1>
     <p>Натисни кнопку, щоб отримати дані з сервера</p>
     
-    <button onclick="getData()">Отримати дані</button>
+    <button id="myBtn">Отримати дані</button>
 
     <div id="result" style="display:none;">
         <h3>Відповідь сервера:</h3>
@@ -25,13 +25,10 @@
     </div>
 
     <script>
-        // ВАЖЛИВО: Для тестування на телефоні в локальній мережі
-        // заміни 'localhost' на локальний IP комп'ютера (наприклад, '192.168.1.5')
-        // БУЛО: const SERVER_URL = 'http://192.168.0.105:3000/api/hello';
+        // Вказуємо відносний шлях (працює і локально, і на Render)
         const SERVER_URL = '/api/hello';
-        const SERVER_PORT = '3000';
-        const SERVER_URL = `http://${SERVER_IP}:${SERVER_PORT}/api/hello`;
 
+        // Функція отримання даних
         async function getData() {
             const resultDiv = document.getElementById('result');
             const msgP = document.getElementById('server-msg');
@@ -41,25 +38,27 @@
                 msgP.innerText = "Завантаження...";
                 resultDiv.style.display = 'block';
 
-                // Робимо запит до сервера
                 const response = await fetch(SERVER_URL);
                 
-                if (!response.ok) throw new Error('Помилка мережі');
+                if (!response.ok) throw new Error('Помилка: ' + response.status);
 
                 const data = await response.json();
 
-                // Відображаємо дані
                 msgP.innerText = data.message;
                 timeSmall.innerText = "Час сервера: " + data.serverTime;
                 msgP.style.color = "green";
 
             } catch (error) {
-                console.error(error);
-                msgP.innerText = "Не вдалося з'єднатися з сервером. Перевір IP-адресу!";
+                console.error("Помилка при запиті:", error);
+                msgP.innerText = "Помилка з'єднання! (Дивись консоль F12)";
                 msgP.style.color = "red";
-                timeSmall.innerText = "";
             }
         }
+
+        // ПРАВИЛЬНЕ ПІДКЛЮЧЕННЯ КНОПКИ
+        // Це гарантує, що функція буде знайдена
+        document.getElementById('myBtn').addEventListener('click', getData);
+
     </script>
 </body>
 </html>
