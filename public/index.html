@@ -3,61 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест Клієнт-Сервер</title>
+    <title>Магічне Передбачення</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f4f4f4; }
-        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
-        button:hover { background: #0056b3; }
-        #result { margin-top: 20px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 { margin-top: 0; color: #4a4a4a; }
+        .emoji { font-size: 50px; margin: 20px 0; display: block; }
+        
+        button {
+            background-color: #764ba2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        button:hover {
+            background-color: #5a387e;
+            transform: scale(1.05);
+        }
+        button:active { transform: scale(0.95); }
+
+        #result-area {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #764ba2;
+            display: none; /* Приховано спочатку */
+        }
+        .prediction-text { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .lucky-num { font-size: 14px; color: #666; }
     </style>
 </head>
 <body>
 
-    <h1>Клієнтський Додаток</h1>
-    <p>Натисни кнопку, щоб отримати дані з сервера</p>
-    
-    <button id="myBtn">Отримати дані</button>
+    <div class="card">
+        <h1>Що чекає на тебе?</h1>
+        <span class="emoji">🔮</span>
+        <p>Натисни кнопку, і сервер відкриє твоє майбутнє.</p>
+        
+        <button id="predict-btn">Отримати передбачення</button>
 
-    <div id="result" style="display:none;">
-        <h3>Відповідь сервера:</h3>
-        <p id="server-msg">...</p>
-        <small id="server-time">...</small>
+        <div id="result-area">
+            <div class="prediction-text" id="text-output">...</div>
+            <div class="lucky-num">Твоє число удачі: <span id="num-output">0</span></div>
+        </div>
     </div>
 
     <script>
-        // Вказуємо відносний шлях (працює і локально, і на Render)
-        const SERVER_URL = '/api/hello';
+        // --- ЛОГІКА КЛІЄНТА ---
 
-        // Функція отримання даних
-        async function getData() {
-            const resultDiv = document.getElementById('result');
-            const msgP = document.getElementById('server-msg');
-            const timeSmall = document.getElementById('server-time');
+        // 1. Знаходимо елементи на сторінці
+        const btn = document.getElementById('predict-btn');
+        const resultArea = document.getElementById('result-area');
+        const textOutput = document.getElementById('text-output');
+        const numOutput = document.getElementById('num-output');
 
+        // 2. Функція, яка робить запит на сервер
+        async function getPrediction() {
             try {
-                msgP.innerText = "Завантаження...";
-                resultDiv.style.display = 'block';
+                // Змінюємо текст кнопки, поки чекаємо
+                btn.innerText = "Магія відбувається...";
+                btn.disabled = true;
 
-                const response = await fetch(SERVER_URL);
+                // Робимо запит (шлях відносний, щоб працювало і локально, і на Render)
+                const response = await fetch('/api/prediction');
                 
-                if (!response.ok) throw new Error('Помилка: ' + response.status);
+                if (!response.ok) throw new Error('Помилка сервера');
 
                 const data = await response.json();
 
-                msgP.innerText = data.message;
-                timeSmall.innerText = "Час сервера: " + data.serverTime;
-                msgP.style.color = "green";
+                // Показуємо результат
+                textOutput.innerText = data.text;
+                numOutput.innerText = data.number;
+                resultArea.style.display = 'block';
 
             } catch (error) {
-                console.error("Помилка при запиті:", error);
-                msgP.innerText = "Помилка з'єднання! (Дивись консоль F12)";
-                msgP.style.color = "red";
+                console.error(error);
+                textOutput.innerText = "Зв'язок із космосом (сервером) втрачено 😞";
+                resultArea.style.display = 'block';
+            } finally {
+                // Повертаємо кнопку до життя
+                btn.innerText = "Отримати ще одне";
+                btn.disabled = false;
             }
         }
 
-        // ПРАВИЛЬНЕ ПІДКЛЮЧЕННЯ КНОПКИ
-        // Це гарантує, що функція буде знайдена
-        document.getElementById('myBtn').addEventListener('click', getData);
+        // 3. Прикріпляємо функцію до кнопки
+        // Це вирішує проблему "Uncaught ReferenceError"
+        btn.addEventListener('click', getPrediction);
 
     </script>
 </body>
